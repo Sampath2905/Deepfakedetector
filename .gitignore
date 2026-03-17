@@ -1,8 +1,33 @@
 # .gitignore
+
+# Python cache
 __pycache__/
 *.py[cod]
+*.pyc
+*.pyo
+
+# Virtual environments (never commit these)
 venv/
-*.egg-info/
-.env
+venv*/
+deepfake_env/
+deepfake_env*/
+env/
+.venv/
+
+# Model weights (large binary files — use Git LFS instead)
 *.pth
 *.pt
+*.h5
+*.ckpt
+
+# Environment variables
+.env
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
