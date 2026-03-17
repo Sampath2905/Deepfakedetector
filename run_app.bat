@@ -1,2 +1,5 @@
 @echo off
-REM run_app.bat - Script to launch the application
+echo Activating environment and launching Deepfake Detector...
+call deepfake_env_310\Scripts\activate.bat
+python app.py
+pause
