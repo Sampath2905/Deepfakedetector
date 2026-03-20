@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DeepGuard AI – Deepfake Detector</title>
+  <meta name="description" content="DeepGuard AI uses advanced EfficientNet models to detect deepfake images and videos in real-time. Upload media and get instant authenticity analysis." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ========== SPLASH SCREEN / INTRO ANIMATION ========== -->
+  <div id="splash-screen">
+    <canvas id="matrix-canvas"></canvas>
+
+    <div class="splash-center">
+      <!-- Animated Scanner Eye -->
+      <div class="scanner-container" id="scanner-eye">
+        <div class="eye-outer">
+          <div class="eye-ring ring-1"></div>
+          <div class="eye-ring ring-2"></div>
+          <div class="eye-ring ring-3"></div>
+          <div class="eye-iris">
+            <div class="eye-pupil"></div>
+            <div class="iris-line l1"></div>
+            <div class="iris-line l2"></div>
+            <div class="iris-line l3"></div>
+            <div class="iris-line l4"></div>
+          </div>
+          <div class="scan-bar"></div>
+          <div class="corner tl"></div>
+          <div class="corner tr"></div>
+          <div class="corner bl"></div>
+          <div class="corner br"></div>
+        </div>
+      </div>
+
+      <!-- Boot text sequence -->
+      <div class="boot-text" id="boot-text">
+        <p class="boot-line" id="bl1"><span class="boot-prefix">&gt;_</span> <span class="typed" data-text="Initializing DeepGuard AI..."></span></p>
+        <p class="boot-line" id="bl2"><span class="boot-prefix">&gt;_</span> <span class="typed" data-text="Loading EfficientNet-B0 model..."></span></p>
+        <p class="boot-line" id="bl3"><span class="boot-prefix">&gt;_</span> <span class="typed" data-text="Calibrating detection pipeline..."></span></p>
+        <p class="boot-line" id="bl4"><span class="boot-prefix">&gt;_</span> <span class="typed" data-text="System READY. Authenticity verified."></span></p>
+      </div>
+
+      <div class="progress-bar-wrap" id="progress-wrap">
+        <div class="progress-bar-fill" id="progress-fill"></div>
+        <span class="progress-label" id="progress-label">0%</span>
+      </div>
+
+      <button class="enter-btn" id="enter-btn" onclick="enterApp()">
+        <span>Launch DeepGuard</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ========== MAIN APP ========== -->
+  <div id="main-app" class="hidden">
+
+    <!-- NAV -->
+    <nav class="navbar" id="navbar">
+      <div class="nav-inner">
+        <div class="nav-logo">
+          <div class="logo-eye">
+            <div class="logo-pupil"></div>
+            <div class="logo-scan"></div>
+          </div>
+          <span class="logo-text">Deep<span class="accent">Guard</span></span>
+          <span class="logo-badge">AI</span>
+        </div>
+        <ul class="nav-links">
+          <li><a href="#hero" class="nav-link active">Home</a></li>
+          <li><a href="#features" class="nav-link">Features</a></li>
+          <li><a href="#detector" class="nav-link">Detector</a></li>
+          <li><a href="#how-it-works" class="nav-link">How It Works</a></li>
+          <li><a href="#stats" class="nav-link">Stats</a></li>
+        </ul>
+        <a href="#detector" class="nav-cta">Try Now</a>
+        <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero" id="hero">
+      <div class="hero-bg-grid"></div>
+      <div class="hero-orb orb-1"></div>
+      <div class="hero-orb orb-2"></div>
+
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="pulse-dot"></span>
+          AI-Powered Detection System
+        </div>
+        <h1 class="hero-title">
+          Unmask the<br/>
+          <span class="gradient-text">Deepfake.</span><br/>
+          Protect the Truth.
+        </h1>
+        <p class="hero-desc">
+          DeepGuard AI uses state-of-the-art EfficientNetV2 and frame-by-frame analysis to detect manipulated images and videos with industry-leading accuracy.
+        </p>
+        <div class="hero-actions">
+          <a href="#detector" class="btn-primary" id="hero-detect-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            Start Detection
+          </a>
+          <a href="#how-it-works" class="btn-ghost">
+            Learn More
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+        </div>
+
+        <div class="hero-stats">
+          <div class="hstat">
+            <span class="hstat-num" data-target="97.8">0</span><span class="hstat-unit">%</span>
+            <span class="hstat-label">Accuracy</span>
+          </div>
+          <div class="hstat-divider"></div>
+          <div class="hstat">
+            <span class="hstat-num" data-target="2">0</span><span class="hstat-unit">s</span>
+            <span class="hstat-label">Avg Detection</span>
+          </div>
+          <div class="hstat-divider"></div>
+          <div class="hstat">
+            <span class="hstat-num" data-target="3">0</span><span class="hstat-unit">+</span>
+            <span class="hstat-label">Media Types</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="hero-scanner">
+          <div class="hs-frame">
+            <div class="hs-corner htl"></div>
+            <div class="hs-corner htr"></div>
+            <div class="hs-corner hbl"></div>
+            <div class="hs-corner hbr"></div>
+            <div class="hs-scan-line"></div>
+            <div class="hs-face-grid">
+              <div class="face-node fn1"></div>
+              <div class="face-node fn2"></div>
+              <div class="face-node fn3"></div>
+              <div class="face-node fn4"></div>
+              <div class="face-node fn5"></div>
+              <div class="face-node fn6"></div>
+              <div class="face-node fn7"></div>
+              <div class="face-line fl1"></div>
+              <div class="face-line fl2"></div>
+              <div class="face-line fl3"></div>
+              <div class="face-line fl4"></div>
+              <svg class="face-svg" viewBox="0 0 200 220">
+                <ellipse cx="100" cy="100" rx="60" ry="75" stroke="rgba(255,100,0,0.3)" stroke-width="1" fill="none"/>
+                <circle cx="78" cy="85" r="10" stroke="rgba(255,100,0,0.5)" stroke-width="1" fill="none"/>
+                <circle cx="122" cy="85" r="10" stroke="rgba(255,100,0,0.5)" stroke-width="1" fill="none"/>
+                <path d="M80 120 Q100 135 120 120" stroke="rgba(255,100,0,0.5)" stroke-width="1.5" fill="none"/>
+                <line x1="100" y1="25" x2="100" y2="175" stroke="rgba(255,100,0,0.15)" stroke-width="1" stroke-dasharray="4 4"/>
+                <line x1="40" y1="100" x2="160" y2="100" stroke="rgba(255,100,0,0.15)" stroke-width="1" stroke-dasharray="4 4"/>
+              </svg>
+            </div>
+            <div class="hs-result-badge">
+              <span class="res-icon">✓</span>
+              <span class="res-text">ANALYZING…</span>
+            </div>
+          </div>
+          <div class="hs-data-side">
+            <div class="data-bar" style="--h:85%"><span>Real</span><div class="bar-fill real"></div><b>85%</b></div>
+            <div class="data-bar" style="--h:15%"><span>Fake</span><div class="bar-fill fake"></div><b>15%</b></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="features" id="features">
+      <div class="section-header">
+        <span class="section-tag">Capabilities</span>
+        <h2 class="section-title">What DeepGuard Detects</h2>
+        <p class="section-desc">A comprehensive multi-modal detection system powered by deep learning</p>
+      </div>
+      <div class="features-grid">
+        <div class="feat-card" id="feat-image">
+          <div class="feat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          </div>
+          <h3>Image Analysis</h3>
+          <p>Upload any image — our CNN-based model scans pixel-level artifacts, GAN fingerprints, and manipulation traces invisible to the human eye.</p>
+          <div class="feat-tech">EfficientNet-B0 · PyTorch · OpenCV</div>
+          <div class="feat-glow"></div>
+        </div>
+        <div class="feat-card featured" id="feat-video">
+          <div class="feat-badge">Most Used</div>
+          <div class="feat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+          </div>
+          <h3>Video Detection</h3>
+          <p>Frame-by-frame temporal analysis extracts key frames and analyzes each face region individually, then averages the confidence across the whole video.</p>
+          <div class="feat-tech">Frame Extraction · Temporal Analysis · MTCNN</div>
+          <div class="feat-glow"></div>
+        </div>
+        <div class="feat-card" id="feat-audio">
+          <div class="feat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          </div>
+          <h3>Audio Detection</h3>
+          <p>RawNet2 architecture analyzes raw waveform audio to detect AI-synthesized voices, voice cloning, and audio deepfakes with high precision.</p>
+          <div class="feat-tech">RawNet2 · Librosa · Waveform Analysis</div>
+          <div class="feat-glow"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DETECTOR PANEL -->
+    <section class="detector-section" id="detector">
+      <div class="detector-bg"></div>
+      <div class="section-header">
+        <span class="section-tag">Live Detector</span>
+        <h2 class="section-title">Analyze Your Media</h2>
+        <p class="section-desc">Upload an image or video below — results are powered by the Gradio backend</p>
+      </div>
+
+      <div class="detector-wrapper">
+        <!-- TAB Switcher -->
+        <div class="tab-switcher" id="tab-switcher">
+          <button class="tab-btn active" id="tab-image" onclick="switchTab('image')" aria-selected="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            Image
+          </button>
+          <button class="tab-btn" id="tab-video" onclick="switchTab('video')" aria-selected="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+            Video
+          </button>
+          <button class="tab-btn" id="tab-audio" onclick="switchTab('audio')" aria-selected="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+            Audio
+          </button>
+          <div class="tab-indicator" id="tab-indicator"></div>
+        </div>
+
+        <!-- Upload Panel -->
+        <div class="detector-panel">
+          <div class="upload-pane" id="upload-pane">
+            <div class="drop-zone" id="drop-zone" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+              <input type="file" id="file-input" hidden />
+              <div class="dz-icon" id="dz-icon">
+                <svg id="dz-svg-image" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="6" y="10" width="52" height="40" rx="4"/><circle cx="22" cy="26" r="5"/><polyline points="6 50 24 32 34 42 44 30 58 50"/></svg>
+                <svg id="dz-svg-video" class="hidden" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="14" width="40" height="36" rx="4"/><polygon points="60 14 44 24 44 40 60 50"/></svg>
+                <svg id="dz-svg-audio" class="hidden" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M32 6a8 8 0 0 0-8 8v20a8 8 0 0 0 16 0V14a8 8 0 0 0-8-8z"/><path d="M50 28v6a18 18 0 0 1-36 0v-6"/><line x1="32" y1="52" x2="32" y2="60"/><line x1="22" y1="60" x2="42" y2="60"/></svg>
+              </div>
+              <h3 class="dz-title" id="dz-title">Drop your image here</h3>
+              <p class="dz-sub" id="dz-sub">or click to browse files</p>
+              <p class="dz-types" id="dz-types">Supports: JPG, PNG, WEBP</p>
+              <button class="browse-btn" id="browse-btn" onclick="document.getElementById('file-input').click()">Browse Files</button>
+            </div>
+
+            <!-- Preview -->
+            <div class="preview-zone hidden" id="preview-zone">
+              <div class="preview-header">
+                <span id="preview-filename">filename.jpg</span>
+                <button class="remove-btn" id="remove-btn" onclick="removeFile()">✕ Remove</button>
+              </div>
+              <div class="preview-content" id="preview-content"></div>
+              <button class="analyze-btn" id="analyze-btn" onclick="analyzeFile()">
+                <span class="analyze-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                </span>
+                <span class="analyze-label">Analyze Now</span>
+                <div class="analyze-shimmer"></div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Result Pane -->
+          <div class="result-pane" id="result-pane">
+            <div class="result-idle" id="result-idle">
+              <div class="idle-animation">
+                <div class="idle-ring ir1"></div>
+                <div class="idle-ring ir2"></div>
+                <div class="idle-ring ir3"></div>
+                <svg class="idle-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <circle cx="32" cy="32" r="26"/>
+                  <path d="M32 20v12l8 4"/>
+                </svg>
+              </div>
+              <p>Awaiting media upload…</p>
+              <p class="idle-sub">Upload a file to start analysis</p>
+            </div>
+
+            <div class="result-scanning hidden" id="result-scanning">
+              <div class="scanning-animation">
+                <div class="scan-ring sr1"></div>
+                <div class="scan-ring sr2"></div>
+                <div class="scan-bar-animated"></div>
+                <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="8" y="8" width="48" height="48" rx="4"/>
+                  <path d="M20 32h24M32 20v24" stroke-dasharray="4"/>
+                </svg>
+              </div>
+              <p class="scanning-text">Scanning media<span class="dots"></span></p>
+              <div class="scan-steps">
+                <div class="scan-step active" id="ss1">Extracting features</div>
+                <div class="scan-step" id="ss2">Running model inference</div>
+                <div class="scan-step" id="ss3">Calculating confidence</div>
+                <div class="scan-step" id="ss4">Generating report</div>
+              </div>
+            </div>
+
+            <div class="result-output hidden" id="result-output">
+              <div class="result-verdict" id="result-verdict">
+                <div class="verdict-icon" id="verdict-icon"></div>
+                <div class="verdict-label" id="verdict-label">REAL</div>
+                <div class="verdict-conf" id="verdict-conf">97.3% Confidence</div>
+              </div>
+              <div class="result-bars" id="result-bars">
+                <div class="rbar-row">
+                  <span>Real</span>
+                  <div class="rbar-track"><div class="rbar-fill real-fill" id="real-fill" style="width:0%"></div></div>
+                  <span id="real-pct">0%</span>
+                </div>
+                <div class="rbar-row">
+                  <span>Fake</span>
+                  <div class="rbar-track"><div class="rbar-fill fake-fill" id="fake-fill" style="width:0%"></div></div>
+                  <span id="fake-pct">0%</span>
+                </div>
+              </div>
+              <div class="result-raw" id="result-raw"></div>
+              <button class="reset-btn" onclick="resetDetector()">Analyze Another</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="how-it-works" id="how-it-works">
+      <div class="section-header">
+        <span class="section-tag">Process</span>
+        <h2 class="section-title">How It Works</h2>
+        <p class="section-desc">Four intelligent steps from upload to verdict</p>
+      </div>
+      <div class="steps-timeline">
+        <div class="step-item">
+          <div class="step-num">01</div>
+          <div class="step-card">
+            <div class="step-icon">
+              <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 3v10M10 9l6-6 6 6"/><rect x="4" y="18" width="24" height="11" rx="2"/></svg>
+            </div>
+            <h3>Upload Media</h3>
+            <p>Drag &amp; drop or browse to upload your image, video, or audio file. Formats: JPG, PNG, MP4, WAV, MP3.</p>
+          </div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-item">
+          <div class="step-num">02</div>
+          <div class="step-card">
+            <div class="step-icon">
+              <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="16" cy="16" r="12"/><path d="M16 10v6l4 2"/></svg>
+            </div>
+            <h3>Pre-processing</h3>
+            <p>Frames are extracted from videos, faces are detected and cropped, images are resized to 224×224 for optimal model input.</p>
+          </div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-item">
+          <div class="step-num">03</div>
+          <div class="step-card">
+            <div class="step-icon">
+              <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="8" width="8" height="16" rx="1"/><rect x="12" y="4" width="8" height="24" rx="1"/><rect x="22" y="10" width="8" height="14" rx="1"/></svg>
+            </div>
+            <h3>AI Inference</h3>
+            <p>EfficientNet-B0 model runs inference on each frame/image, producing real vs. fake softmax scores per sample.</p>
+          </div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-item">
+          <div class="step-num">04</div>
+          <div class="step-card">
+            <div class="step-icon">
+              <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 16h22M16 5l11 11-11 11"/></svg>
+            </div>
+            <h3>Verdict</h3>
+            <p>Scores are averaged across frames. A threshold of 0.5 determines REAL or FAKE. Confidence percentage is reported.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATS SECTION -->
+    <section class="stats-section" id="stats">
+      <div class="stats-bg-glow"></div>
+      <div class="section-header">
+        <span class="section-tag">Performance</span>
+        <h2 class="section-title">Detection Performance</h2>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-ring">
+            <svg viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="40" fill="none" stroke="#1a1a1a" stroke-width="8"/>
+              <circle cx="50" cy="50" r="40" fill="none" stroke="url(#gradient-1)" stroke-width="8" stroke-dasharray="251.2" stroke-dashoffset="12.56" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+              <defs><linearGradient id="gradient-1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ff6400"/><stop offset="100%" stop-color="#ff9a00"/></linearGradient></defs>
+            </svg>
+            <span class="ring-val">97.8%</span>
+          </div>
+          <h3>Image Accuracy</h3>
+          <p>EfficientNet-B0 on held-out test set</p>
+        </div>
+        <div class="stat-card">
+          <div class="stat-ring">
+            <svg viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="40" fill="none" stroke="#1a1a1a" stroke-width="8"/>
+              <circle cx="50" cy="50" r="40" fill="none" stroke="url(#gradient-2)" stroke-width="8" stroke-dasharray="251.2" stroke-dashoffset="17.58" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+              <defs><linearGradient id="gradient-2" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ff6400"/><stop offset="100%" stop-color="#ff9a00"/></linearGradient></defs>
+            </svg>
+            <span class="ring-val">93%</span>
+          </div>
+          <h3>Video Accuracy</h3>
+          <p>Frame-by-frame temporal averaging</p>
+        </div>
+        <div class="stat-card">
+          <div class="stat-ring">
+            <svg viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="40" fill="none" stroke="#1a1a1a" stroke-width="8"/>
+              <circle cx="50" cy="50" r="40" fill="none" stroke="url(#gradient-3)" stroke-width="8" stroke-dasharray="251.2" stroke-dashoffset="22.6" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+              <defs><linearGradient id="gradient-3" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ff6400"/><stop offset="100%" stop-color="#ff9a00"/></linearGradient></defs>
+            </svg>
+            <span class="ring-val">91%</span>
+          </div>
+          <h3>Audio Accuracy</h3>
+          <p>RawNet2 on synthetic voice datasets</p>
+        </div>
+        <div class="stat-card">
+          <div class="stat-ring">
+            <svg viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="40" fill="none" stroke="#1a1a1a" stroke-width="8"/>
+              <circle cx="50" cy="50" r="40" fill="none" stroke="url(#gradient-4)" stroke-width="8" stroke-dasharray="251.2" stroke-dashoffset="5" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+              <defs><linearGradient id="gradient-4" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ff6400"/><stop offset="100%" stop-color="#ff9a00"/></linearGradient></defs>
+            </svg>
+            <span class="ring-val">~2s</span>
+          </div>
+          <h3>Avg. Analysis</h3>
+          <p>Per image on standard hardware</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="nav-logo">
+            <div class="logo-eye">
+              <div class="logo-pupil"></div>
+              <div class="logo-scan"></div>
+            </div>
+            <span class="logo-text">Deep<span class="accent">Guard</span></span>
+            <span class="logo-badge">AI</span>
+          </div>
+          <p>Advanced deepfake detection powered by EfficientNet and RawNet2 models. Built for truth.</p>
+        </div>
+        <div class="footer-links">
+          <h4>Navigation</h4>
+          <a href="#hero">Home</a>
+          <a href="#features">Features</a>
+          <a href="#detector">Detector</a>
+          <a href="#how-it-works">How It Works</a>
+        </div>
+        <div class="footer-links">
+          <h4>Technology</h4>
+          <a href="#">EfficientNet-B0</a>
+          <a href="#">RawNet2</a>
+          <a href="#">OpenCV</a>
+          <a href="#">TensorFlow</a>
+        </div>
+        <div class="footer-links">
+          <h4>About</h4>
+          <a href="#">Documentation</a>
+          <a href="#">GitHub</a>
+          <a href="#">Privacy Policy</a>
+          <a href="#">Contact</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2025 DeepGuard AI. Powered by EfficientNetV2 & RawNet2.</p>
+        <p>Built for research and educational purposes.</p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

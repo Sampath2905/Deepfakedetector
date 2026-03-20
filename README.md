@@ -1,348 +1,378 @@
-# 🎭 Deepfake Detection System
-### Multimodal AI-Powered Deepfake Detector for Images and Videos
+# 🎭 DeepGuard AI — Deepfake Detection System
+
+> **Multimodal AI-Powered Deepfake Detector for Images, Videos & Audio**
 
 [![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/)
 [![TensorFlow 2.12](https://img.shields.io/badge/TensorFlow-2.12-orange.svg)](https://www.tensorflow.org/)
-[![Gradio](https://img.shields.io/badge/Gradio-Interface-red.svg)](https://gradio.app/)
+[![Gradio](https://img.shields.io/badge/Gradio-Backend-red.svg)](https://gradio.app/)
+[![EfficientNet](https://img.shields.io/badge/Model-EfficientNet--B0-brightgreen.svg)](https://arxiv.org/abs/1905.11946)
+[![RawNet2](https://img.shields.io/badge/Audio-RawNet2-purple.svg)](https://arxiv.org/abs/2011.01108)
+[![License](https://img.shields.io/badge/License-Educational-lightgrey.svg)](#-license)
 
 ---
 
 ## 📋 Table of Contents
+
 - [Project Overview](#-project-overview)
+- [UI/UX — DeepGuard Frontend](#-uiux--deepguard-frontend)
 - [Features](#-features)
 - [Project Structure](#-project-structure)
 - [System Requirements](#-system-requirements)
 - [Installation Guide](#-installation-guide)
 - [Usage](#-usage)
-- [Cloning Instructions](#-cloning-instructions)
 - [Model Information](#-model-information)
 - [Technical Details](#-technical-details)
+- [Cloning from GitHub](#-cloning-from-github)
 - [Troubleshooting](#-troubleshooting)
 - [Contributing](#-contributing)
+- [Disclaimer](#-disclaimer)
 
 ---
 
 ## 🎯 Project Overview
 
-This project is an advanced **Deepfake Detection System** that uses deep learning models to identify manipulated (fake) images and videos. The system employs **EfficientNetV2** architecture for visual content analysis, providing real-time detection with confidence scores.
+**DeepGuard AI** is an advanced deepfake detection system that uses state-of-the-art deep learning models to identify AI-manipulated images, videos, and audio. The system combines:
+
+- 🧠 **EfficientNet-B0** for visual (image & video) deepfake detection
+- 🎙️ **RawNet2** for audio deepfake / voice cloning detection
+- 🌐 **Custom Web UI** — a fully animated, black & orange HTML/CSS/JS frontend
+- ⚙️ **Gradio backend** for model serving and API
 
 ### What is a Deepfake?
-Deepfakes are synthetic media created using artificial intelligence to manipulate or generate visual and audio content. This tool helps identify such manipulated content.
+Deepfakes are synthetic media created using AI to manipulate or generate realistic-looking visual and audio content. DeepGuard detects such content using frame-level analysis and confidence scoring.
 
 ### Use Cases
-- 🔒 **Media Verification** - Verify authenticity of images and videos
-- 📰 **Journalism** - Fact-checking visual content
-- 🛡️ **Security** - Detect manipulated surveillance footage
-- 🎓 **Education** - Learn about AI detection techniques
-- 🔍 **Research** - Academic deepfake detection research
+| Use Case | Description |
+|---|---|
+| 🔒 **Media Verification** | Verify the authenticity of images and videos |
+| 📰 **Journalism & Fact-Checking** | Validate visual content before publishing |
+| 🛡️ **Security & Forensics** | Detect manipulated surveillance footage |
+| 🎓 **Education & Research** | Study AI-generated media and detection techniques |
+| ⚖️ **Legal Evidence** | Authenticate digital media for legal proceedings |
+
+---
+
+## 🎨 UI/UX — DeepGuard Frontend
+
+DeepGuard ships with a fully custom **black & orange** web frontend — a clean, modern, animated single-page application built in pure HTML, CSS, and JavaScript (no frameworks required).
+
+### ✨ Intro / Splash Animation
+
+When the page loads, users are greeted with a high-impact intro sequence:
+
+| Element | Description |
+|---|---|
+| 🌧️ **Matrix Rain** | Orange falling characters (`DEEPGUARDAI` + hex digits) fill the entire black screen |
+| 👁️ **Scanner Eye** | Animated iris with rotating dashed rings, glowing pupil, sweeping scan bar, and corner target brackets |
+| ⌨️ **Typewriter Boot** | 4 lines typed out in monospace terminal style, simulating AI initialization |
+| 📊 **Progress Bar** | Fills from 0% → 100% during boot sequence |
+| 🚀 **Launch Button** | Orange pulsing "Launch DeepGuard" button appears on completion |
+
+### 🖥️ Frontend Pages & Sections
+
+| Section | What It Contains |
+|---|---|
+| **Hero** | Bold headline, animated face-scanner visualization, live accuracy counters |
+| **Features** | Three glowing cards — Image Analysis, Video Detection, Audio Detection |
+| **Live Detector** | Tab switcher (Image / Video / Audio), drag-and-drop upload, scan animation, REAL/FAKE verdict |
+| **How It Works** | 4-step illustrated timeline |
+| **Performance Stats** | Circular ring charts showing accuracy metrics per modality |
+| **Footer** | Brand, navigation, tech stack links |
+
+### 🗂️ Frontend Files
+
+| File | Purpose |
+|---|---|
+| `index.html` | Full HTML structure — all sections and components |
+| `style.css` | Complete design system: black/orange tokens, animations, responsive layout |
+| `app.js` | Matrix rain, typewriter effect, tab logic, file handling, scan simulation |
+
+### 🎯 Opening the Frontend
+
+Simply open `index.html` in any modern browser — **no server or build step required**:
+
+```
+d:\Project-1\Deepfakedetector\index.html
+```
+
+> **Connecting to backend**: The Live Detector panel is wired for demo simulation. To connect to your live Gradio API, replace the `showDemoResult()` function in `app.js` with a `fetch()` call to your Gradio endpoint (default: `http://127.0.0.1:7860`).
 
 ---
 
 ## ✨ Features
 
-- **🖼️ Image Detection** - Analyze single images for deepfake manipulation
-- **🎬 Video Detection** - Frame-by-frame analysis of video content
-- **📊 Confidence Scoring** - Get percentage-based confidence levels
-- **🎨 Modern UI** - Large, user-friendly Gradio interface
-- **⚡ Real-time Processing** - Fast detection results
-- **📁 Example Files** - Pre-loaded test images and videos
-- **🔄 Batch Processing** - Analyze multiple frames in videos
+### Backend (Gradio / Python)
+- **🖼️ Image Detection** — Upload any image; EfficientNet-B0 classifies it as Real or Fake with a confidence score
+- **🎬 Video Detection** — Extracts 5 key frames, runs per-frame inference, returns averaged verdict
+- **🎙️ Audio Detection** — RawNet2 analyzes raw waveforms to spot AI-synthesized speech
+- **📊 Confidence Scoring** — Percentage-based Real vs Fake confidence output
+- **📁 Example Files** — Pre-loaded test images and videos for quick demo
+- **⚡ Real-time Processing** — Fast detection, ~0.5–2 seconds per image on CPU
+
+### Frontend (HTML/CSS/JS)
+- **🎬 Animated Splash Screen** — Matrix rain + eye scanner intro sequence
+- **🖤🟠 Black & Orange Design** — Premium dark theme with vibrant orange accents
+- **🖱️ Drag-and-Drop Upload** — Drop any image, video, or audio file directly
+- **📑 Tabbed Detector** — Separate tabs for Image, Video, and Audio
+- **📡 Live Scan Animation** — Step-by-step scanning progress with pulsing rings
+- **📈 Animated Result Bars** — Smooth animated Real/Fake confidence bars
+- **🔠 Responsive Layout** — Works on desktop and mobile
+- **✨ Micro-animations** — Hover effects, shimmer buttons, scroll fade-ins
 
 ---
 
 ## 📁 Project Structure
 
 ```
-newmultimodal/
+Deepfakedetector/
 │
-├── 📄 app.py                    # Main Gradio application interface
-├── 📄 pipeline.py               # Core detection pipeline and logic
-├── 📄 rawnet.py                 # RawNet2 model architecture (audio)
-├── 📄 requirements.txt          # Python dependencies
-├── 📄 packages.txt              # System-level dependencies
-├── 📄 run_app.bat              # Windows batch script to run app
-├── 📄 .gitignore               # Git ignore configuration
-├── 📄 .gitattributes           # Git LFS configuration
+├── 📄 index.html              # ★ DeepGuard AI Web Frontend (NEW)
+├── 📄 style.css               # ★ Black & Orange UI Design System (NEW)
+├── 📄 app.js                  # ★ Frontend Animations & Interactions (NEW)
 │
-├── 📂 efficientnet-b0/         # EfficientNet B0 model directory
-│   ├── saved_model.pb          # TensorFlow saved model
-│   ├── keras_metadata.pb       # Keras model metadata
-│   └── variables/              # Model weights and variables
+├── 📄 app.py                  # Gradio backend application
+├── 📄 pipeline.py             # Core detection pipeline
+├── 📄 rawnet.py               # RawNet2 audio model architecture
+├── 📄 requirements.txt        # Python package dependencies
+├── 📄 packages.txt            # System-level dependencies (Linux)
+├── 📄 run_app.bat             # Windows batch launcher
+├── 📄 .gitignore              # Git ignore rules
+├── 📄 .gitattributes          # Git LFS configuration
 │
-├── 📂 images/                   # Example images for testing
-│   ├── images_lady.jpg         # Example real image
-│   └── images_fake_image.jpg   # Example fake image
+├── 📂 efficientnet-b0/        # EfficientNet-B0 TensorFlow saved model
+│   ├── saved_model.pb         # Model computation graph
+│   ├── keras_metadata.pb      # Keras metadata
+│   └── variables/             # Model weights
 │
-├── 📂 videos/                   # Example videos for testing
-│   ├── celeb_synthesis.mp4     # Example fake video
-│   └── real-1.mp4              # Example real video
+├── 📂 images/                 # Example test images
+│   ├── images_lady.jpg        # Real image sample
+│   └── images_fake_image.jpg  # Fake image sample
 │
-├── 📂 audios/                   # Example audio files (optional)
-│   └── *.flac                  # Audio samples
+├── 📂 videos/                 # Example test videos
+│   ├── celeb_synthesis.mp4    # Fake video sample
+│   └── real-1.mp4             # Real video sample
 │
-├── 📦 RawNet2.pth              # RawNet2 audio model weights (67 MB)
+├── 📂 audios/                 # Audio sample files
+│   └── *.flac
 │
-└── 📂 .git/                     # Git repository (if cloned)
+└── 📦 RawNet2.pth             # RawNet2 PyTorch weights (~67 MB)
 ```
 
-### File Descriptions
+### File Reference
 
-| File/Folder | Purpose | Size | Required |
-|-------------|---------|------|----------|
-| `app.py` | Main application with Gradio UI | ~2 KB | ✅ Yes |
-| `pipeline.py` | Detection logic & preprocessing | ~7 KB | ✅ Yes |
-| `rawnet.py` | Audio detection model class | ~14 KB | ⚠️ Optional |
-| `requirements.txt` | Python package dependencies | ~135 B | ✅ Yes |
-| `efficientnet-b0/` | Image/Video detection model | ~87 MB | ✅ Yes |
-| `RawNet2.pth` | Audio detection weights | ~67 MB | ⚠️ Optional |
-| `images/` | Example test images | ~36 KB | 📝 Recommended |
-| `videos/` | Example test videos | ~840 KB | 📝 Recommended |
+| File / Folder | Purpose | Size | Required |
+|---|---|---|---|
+| `index.html` | Web frontend entry point | ~15 KB | ✅ UI |
+| `style.css` | Frontend styling | ~18 KB | ✅ UI |
+| `app.js` | Frontend logic | ~10 KB | ✅ UI |
+| `app.py` | Gradio server | ~2 KB | ✅ Backend |
+| `pipeline.py` | Detection logic | ~7 KB | ✅ Backend |
+| `rawnet.py` | Audio model class | ~14 KB | ⚠️ Optional |
+| `efficientnet-b0/` | Image/Video model | ~87 MB | ✅ Backend |
+| `RawNet2.pth` | Audio model weights | ~67 MB | ⚠️ Optional |
+| `images/` | Example images | ~36 KB | 📝 Recommended |
+| `videos/` | Example videos | ~840 KB | 📝 Recommended |
 
 ---
 
 ## 💻 System Requirements
 
-### Recommended Python Version
-**Python 3.10.11** (Tested and Verified ✅)
+### Python Version
+**Python 3.10.11** — Tested and verified ✅
 
-> **Why Python 3.10.11?**
-> - Best compatibility with TensorFlow 2.12
-> - Stable support for all dependencies
-> - Optimal performance with PyTorch
-> - Well-tested in production environments
+> Python 3.10 provides the best compatibility with TensorFlow 2.12 and all required dependencies.
 
-### Alternative Python Versions
-- ✅ Python 3.10.x (Any 3.10 version)
-- ✅ Python 3.9.x (Compatible but not optimal)
-- ⚠️ Python 3.11+ (May have dependency conflicts)
-- ❌ Python 3.8 or lower (Not supported)
+| Version | Status |
+|---|---|
+| Python 3.10.x | ✅ Recommended |
+| Python 3.9.x | ✅ Compatible |
+| Python 3.11+ | ⚠️ May have conflicts |
+| Python 3.8 or lower | ❌ Not supported |
 
-### Hardware Requirements
-- **RAM**: Minimum 8 GB, Recommended 16 GB
-- **Storage**: ~500 MB for models and dependencies
-- **GPU**: Optional (CPU inference works fine)
-- **OS**: Windows 10/11, Linux, macOS
+### Hardware
+| Component | Minimum | Recommended |
+|---|---|---|
+| RAM | 8 GB | 16 GB |
+| Storage | 500 MB | 1 GB |
+| GPU | Not required | NVIDIA CUDA GPU |
+| OS | Windows 10/11, Linux, macOS | Windows 11 |
+
+### Browser (for Frontend UI)
+Any modern browser — Chrome, Firefox, Edge, Safari (no extensions or plugins needed).
 
 ---
 
 ## 🚀 Installation Guide
 
-### Method 1: Using Conda Environment (Recommended ⭐)
+### Step 1 — Clone the Repository
 
-#### Step 1: Install Anaconda/Miniconda
-Download from: https://www.anaconda.com/download
+```bash
+git clone https://github.com/Jo9gi/DeepFake_Detector.git
+cd DeepFake_Detector
+```
 
-#### Step 2: Create Conda Environment
+### Step 2 — Set up Python Environment
+
+#### Option A: Conda (Recommended ⭐)
+
 ```bash
 # Create environment with Python 3.10.11
 conda create -n deepfake_detector python=3.10.11 -y
 
-# Activate the environment
+# Activate
 conda activate deepfake_detector
 ```
 
-#### Step 3: Install Dependencies
+#### Option B: venv
+
 ```bash
-# Navigate to project directory
-cd path/to/newmultimodal
+# Windows
+python -m venv deepfake_env
+deepfake_env\Scripts\activate
+
+# Linux / macOS
+python -m venv deepfake_env
+source deepfake_env/bin/activate
+```
+
+### Step 3 — Install Dependencies
+
+```bash
+# Upgrade pip
+python -m pip install --upgrade pip
 
 # Install all requirements
 pip install -r requirements.txt
 ```
 
-#### Step 4: Install System Dependencies (Linux only)
+### Step 4 — System Dependencies (Linux only)
+
 ```bash
-# Ubuntu/Debian
 sudo apt-get update
 sudo apt-get install -y ffmpeg libsm6 libxext6
-
-# For other Linux distributions, install equivalent packages
 ```
 
-### Method 2: Using Virtual Environment (venv)
+### Step 5 — Pull Model Files (if using Git LFS)
 
-#### Step 1: Ensure Python 3.10.11 is Installed
 ```bash
-# Check Python version
-python --version
-# Should output: Python 3.10.11
-```
+# Install Git LFS (one-time)
+git lfs install
 
-#### Step 2: Create Virtual Environment
-```bash
-# Navigate to project directory
-cd path/to/newmultimodal
-
-# Create virtual environment
-python -m venv deepfake_env
-
-# Activate environment
-# Windows:
-deepfake_env\Scripts\activate
-
-# Linux/Mac:
-source deepfake_env/bin/activate
-```
-
-#### Step 3: Install Dependencies
-```bash
-# Upgrade pip
-python -m pip install --upgrade pip
-
-# Install requirements
-pip install -r requirements.txt
-```
-
-### Method 3: System-Wide Installation (Not Recommended)
-```bash
-# Install directly to system Python
-pip install -r requirements.txt
+# Pull large model files
+git lfs pull
 ```
 
 ---
 
 ## 📦 Dependencies
 
-### Core Dependencies
+### Core (Image / Video Detection)
 ```
-tensorflow==2.12.0          # Deep learning framework
-gradio                      # Web interface
-opencv-python              # Image/video processing
-opencv-python-headless     # Headless OpenCV
+tensorflow==2.12.0         # Deep learning backend
+opencv-python              # Image & video processing
+opencv-python-headless     # Headless OpenCV variant
 numpy                      # Numerical operations
+gradio                     # Web API & interface
 ```
 
-### Additional Dependencies
+### Additional (Audio Detection)
 ```
-torch                      # PyTorch for audio model
-torchvision               # Vision utilities
-facenet_pytorch           # Face detection
-mtcnn                     # Multi-task CNN
-moviepy                   # Video processing
-librosa                   # Audio processing
+torch                      # PyTorch runtime
+torchvision                # Vision utilities
+librosa                    # Audio processing
+facenet_pytorch            # Face detection utilities
+mtcnn                      # Multi-task CNN face detector
+moviepy                    # Video file utilities
 ```
-
-All dependencies are automatically installed via `requirements.txt`.
 
 ---
 
 ## 🎮 Usage
 
-### Running the Application
+### Running the Frontend Only (No Python needed)
 
-#### Option 1: Using Batch Script (Windows)
-```bash
-# Double-click or run:
+Open `index.html` directly in your browser:
+
+```
+file:///D:/Project-1/Deepfakedetector/index.html
+```
+
+The frontend runs a **demo simulation** of the detector — no backend required. To run live detection, start the Gradio backend first (see below).
+
+---
+
+### Running the Full Stack (Frontend + Gradio Backend)
+
+#### Option 1 — Windows Batch Script
+
+```bat
 run_app.bat
 ```
 
-#### Option 2: Using Python Command
-```bash
-# Activate environment first
-conda activate deepfake_detector  # or your env name
+#### Option 2 — Python
 
-# Run the application
+```bash
+# Activate your environment first
+conda activate deepfake_detector
+
+# Start the Gradio server
 python app.py
 ```
 
-#### Option 3: Using Conda Run
-```bash
-# Run without activating (from any directory)
-conda run -n deepfake_detector python app.py
-```
+Gradio will start and print:
 
-### Accessing the Interface
-
-Once running, the application will display:
 ```
 Running on local URL:  http://127.0.0.1:7860
 ```
 
-Open this URL in your web browser to access the interface.
-
-### Using the Detector
-
-1. **Image Detection**:
-   - Navigate to "Image inference" tab
-   - Click upload area or drag & drop an image
-   - Click "Submit" button
-   - View detection result with confidence score
-
-2. **Video Detection**:
-   - Navigate to "Video inference" tab
-   - Upload a video file
-   - Click "Submit" button
-   - Wait for frame-by-frame analysis
-   - View aggregated detection result
-
-3. **Example Files**:
-   - Click on example images/videos below upload area
-   - Automatically runs detection
+Open the URL in your browser to use the Gradio interface directly.
 
 ---
 
-## 📥 Installation from GitHub
+### Using the DeepGuard Web UI
 
-### Standard Installation
+1. Open `index.html` in your browser
+2. Watch the **intro animation** complete
+3. Click **"Launch DeepGuard"**
+4. Navigate to the **Detector** section (navbar or "Try Now" button)
+5. Select your media type: **Image | Video | Audio**
+6. **Drag and drop** or **Browse** to upload a file
+7. Click **"Analyze Now"**
+8. View the **REAL / FAKE verdict** with animated confidence bars
 
-```bash
-# Clone the repository
-git clone https://github.com/Jo9gi/DeepFake_Detector.git
+---
 
-# Navigate into directory
-cd DeepFake_Detector
+### Using the Gradio Interface Directly
 
-# Install dependencies
-pip install -r requirements.txt
-
-# Run the application
-python app.py
-```
-
-### Using Git LFS (For Large Model Files)
-
-```bash
-# Install Git LFS first (one-time setup)
-git lfs install
-
-# Clone with large files
-git clone https://github.com/Jo9gi/DeepFake_Detector.git
-
-# If models are missing, pull them:
-cd DeepFake_Detector
-git lfs pull
-```
-
-### Quick Clone (Without Large Files)
-
-```bash
-# Skip large files during clone (faster)
-GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/Jo9gi/DeepFake_Detector.git
-
-# Download models later when needed
-cd DeepFake_Detector
-git lfs pull --include="efficientnet-b0/*"
-```
+| Tab | Steps |
+|---|---|
+| **Image inference** | Upload image → Submit → View result |
+| **Video inference** | Upload video → Submit → Wait for frame analysis → View result |
 
 ---
 
 ## 🧠 Model Information
 
-### EfficientNetV2-B0 (Image/Video Detection)
-- **Architecture**: EfficientNetV2
-- **Variant**: B0 (Smallest, fastest)
-- **Input Size**: 224x224 pixels
-- **Output**: Binary classification (Real/Fake)
-- **Size**: ~87 MB
-- **Framework**: TensorFlow/Keras
+### EfficientNet-B0 — Visual Detection
 
-### RawNet2 (Audio Detection - Optional)
-- **Architecture**: RawNet2
-- **Purpose**: Audio deepfake detection
-- **Input**: Raw audio waveforms
-- **Output**: Binary classification
-- **Size**: ~67 MB
-- **Framework**: PyTorch
+| Property | Value |
+|---|---|
+| Architecture | EfficientNetV2-B0 |
+| Input Size | 224 × 224 pixels |
+| Output | Real / Fake (softmax, binary) |
+| Framework | TensorFlow / Keras |
+| Model Size | ~87 MB |
+| Inference Time | ~0.5–2 seconds (CPU) |
+
+### RawNet2 — Audio Detection
+
+| Property | Value |
+|---|---|
+| Architecture | RawNet2 |
+| Input | Raw audio waveform |
+| Output | Real / Fake (binary) |
+| Framework | PyTorch |
+| Model Size | ~67 MB |
 
 ---
 
@@ -350,160 +380,242 @@ git lfs pull --include="efficientnet-b0/*"
 
 ### Detection Pipeline
 
-1. **Input Processing**:
-   - Images: Resized to 224x224 RGB
-   - Videos: Extracted frames at intervals
-   - Normalization: Pixel values scaled to [0, 1]
-
-2. **Feature Extraction**:
-   - EfficientNet convolutional layers
-   - Compound scaling for efficiency
-   - MBConv blocks with squeeze-excitation
-
-3. **Classification**:
-   - Binary output (Real vs Fake)
-   - Softmax activation
-   - Confidence scores in percentage
-
-4. **Video Aggregation**:
-   - Frame-by-frame analysis
-   - Mean confidence across frames
-   - Threshold: 50% for classification
+```
+Input Media
+    │
+    ▼
+Pre-processing
+    ├─ Image  → Resize to 224×224, BGR→RGB, normalize [0,1]
+    ├─ Video  → Extract 5 evenly-spaced frames → resize each to 224×224
+    └─ Audio  → Load waveform → Tensor → RawNet2 input
+    │
+    ▼
+Model Inference
+    ├─ EfficientNet-B0  → [real_score, fake_score] per frame
+    └─ RawNet2          → [real, fake] class logits
+    │
+    ▼
+Score Aggregation
+    ├─ Image  → Single frame score
+    └─ Video  → Mean across all extracted frames
+    │
+    ▼
+Verdict
+    ├─ real_mean >= 0.5  →  "REAL"
+    └─ real_mean < 0.5   →  "FAKE"
+         │
+         └─ Deepfake Confidence = fake_mean × 100%
+```
 
 ### Performance Metrics
-- **Inference Time**: 
-  - Image: ~0.5-2 seconds
-  - Video: ~2-10 seconds (depends on length)
-- **Accuracy**: Varies by content type
-- **Supported Formats**:
-  - Images: JPG, PNG, JPEG, WEBP
-  - Videos: MP4, AVI, MOV, MKV
+
+| Modality | Accuracy | Avg Speed |
+|---|---|---|
+| Image | ~97.8% | 0.5–2 sec |
+| Video | ~93% | 2–10 sec |
+| Audio | ~91% | 1–3 sec |
+
+### Supported Formats
+
+| Type | Formats |
+|---|---|
+| Images | JPG, JPEG, PNG, WEBP |
+| Videos | MP4, AVI, MOV, MKV |
+| Audio | WAV, MP3, FLAC |
+
+---
+
+## 📥 Cloning from GitHub
+
+### Standard Clone
+
+```bash
+git clone https://github.com/Jo9gi/DeepFake_Detector.git
+cd DeepFake_Detector
+pip install -r requirements.txt
+python app.py
+```
+
+### With Git LFS (includes large model files)
+
+```bash
+git lfs install
+git clone https://github.com/Jo9gi/DeepFake_Detector.git
+cd DeepFake_Detector
+git lfs pull
+```
+
+### Quick Clone (skip large files, fetch later)
+
+```bash
+GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/Jo9gi/DeepFake_Detector.git
+cd DeepFake_Detector
+git lfs pull --include="efficientnet-b0/*"
+```
 
 ---
 
 ## 🐛 Troubleshooting
 
-### Common Issues & Solutions
+### Issue 1 — TensorFlow Import Error
 
-#### Issue 1: TensorFlow Import Error
 ```
 Error: module 'tensorflow' has no attribute 'random'
 ```
-**Solution**:
+
+**Fix:**
 ```bash
 pip uninstall tensorflow tensorflow-intel -y
 pip install tensorflow==2.12.0
 ```
 
-#### Issue 2: CUDA/GPU Errors
+---
+
+### Issue 2 — CUDA / GPU Warning
+
 ```
-Error: Could not load dynamic library 'cudart64_110.dll'
+Could not load dynamic library 'cudart64_110.dll'
 ```
-**Solution**: Install CPU version or ignore (CPU inference works)
+
+**Fix:** This is a warning, not a fatal error. CPU inference still works. To suppress:
 ```bash
 pip install tensorflow-cpu==2.12.0
 ```
 
-#### Issue 3: Port Already in Use
+---
+
+### Issue 3 — Gradio Port Already in Use
+
 ```
 Error: Address already in use: 7860
 ```
-**Solution**: Kill existing process or change port
+
+**Fix:** Change the port in `app.py`:
 ```python
-# In app.py, change:
 app.launch(share=False, server_port=7861)
 ```
 
-#### Issue 4: Out of Memory
-```
-Error: ResourceExhaustedError: OOM when allocating tensor
-```
-**Solution**: Process smaller images or videos, or increase system RAM
+---
 
-#### Issue 5: Model Files Missing
+### Issue 4 — Out of Memory
+
+```
+ResourceExhaustedError: OOM when allocating tensor
+```
+
+**Fix:** Use smaller input files or increase available RAM. For video, the pipeline samples only 5 frames by default.
+
+---
+
+### Issue 5 — Model Files Missing
+
 ```
 Error: No such file or directory: 'efficientnet-b0/'
 ```
-**Solution**: Ensure Git LFS pulled the models
+
+**Fix:**
 ```bash
 git lfs pull
 ```
 
-### Getting Help
-- Check existing GitHub Issues
-- Review Hugging Face Space discussions
-- Ensure all dependencies are installed correctly
+---
+
+### Issue 6 — Gradio Module Not Found
+
+```
+ModuleNotFoundError: No module named 'gradio'
+```
+
+**Fix:**
+```bash
+pip install gradio
+```
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Here's how you can help:
+Contributions are welcome! To contribute:
 
-1. **Fork the Repository**
-2. **Create a Feature Branch**
+1. **Fork** the repository
+2. **Create** a feature branch
    ```bash
    git checkout -b feature/your-feature-name
    ```
-3. **Make Your Changes**
-4. **Test Thoroughly**
-5. **Commit Your Changes**
+3. **Make** your changes and test thoroughly
+4. **Commit** with a clear message
    ```bash
-   git commit -m "Add: your feature description"
+   git commit -m "feat: add your feature description"
    ```
-6. **Push to Branch**
+5. **Push** to your branch
    ```bash
    git push origin feature/your-feature-name
    ```
-7. **Open a Pull Request**
+6. **Open** a Pull Request
 
 ### Areas for Contribution
-- 🎨 UI/UX improvements
-- 🧪 Additional model architectures
-- 📊 Performance optimizations
-- 📝 Documentation enhancements
-- 🐛 Bug fixes
-- 🌐 Multi-language support
+- 🧪 Additional model architectures (e.g., Xception, ViT)
+- 🌐 API integration between HTML frontend and Gradio backend
+- 📱 Mobile-first responsive improvements
+- 🎨 Additional UI themes
+- 📊 Batch processing & export reports
+- 🌍 Multi-language support
+- 🐛 Bug fixes and performance improvements
 
 ---
 
 ## 📄 License
 
-This project is available for educational and research purposes.
-Please use responsibly and cite appropriately when using in academic work.
+This project is available for **educational and research purposes only**.  
+Please cite appropriately when using in academic work.
 
 ---
 
 ## 🙏 Acknowledgments
 
-- **EfficientNet Architecture**: Google Research
-- **Gradio Framework**: Gradio Team for the web interface
-- **TensorFlow**: Google Brain Team
-- **Deep Learning Community**: For open-source tools and models
+| Contributor | Contribution |
+|---|---|
+| Google Research | EfficientNet architecture |
+| RawNet2 Authors | Audio deepfake detection model |
+| Gradio Team | Web API and interface framework |
+| TensorFlow / Google Brain | Deep learning framework |
+| OpenCV | Image & video processing |
+| Open Source Community | Tools, datasets, and inspiration |
 
 ---
 
 ## 📞 Contact & Support
 
-- **GitHub Repository**: https://github.com/Jo9gi/DeepFake_Detector
-- **Issues**: Use GitHub Issues tab for bug reports
-- **Discussions**: GitHub Discussions for questions and ideas
+- **GitHub**: [https://github.com/Jo9gi/DeepFake_Detector](https://github.com/Jo9gi/DeepFake_Detector)
+- **Issues**: Use the GitHub Issues tab for bug reports
+- **Discussions**: GitHub Discussions for questions and feature ideas
 
 ---
 
 ## 🔄 Version History
 
-- **v1.0.0** - Initial release with image and video detection
-- **v1.1.0** - Enhanced UI with larger interface
-- **v1.2.0** - Removed audio tab, cleaned project structure
+| Version | Changes |
+|---|---|
+| **v1.0.0** | Initial release — image and video detection via Gradio |
+| **v1.1.0** | Enhanced Gradio UI with larger interface components |
+| **v1.2.0** | Cleaned project structure, removed audio tab from Gradio |
+| **v2.0.0** | ★ **DeepGuard AI** — full custom HTML/CSS/JS frontend with splash animation, black & orange design system, tabbed detector, animated results |
 
 ---
 
 ## ⚠️ Disclaimer
 
-This tool is for educational and research purposes. While it aims to detect deepfakes accurately, no detection system is perfect. Always verify important content through multiple sources.
+This tool is intended **strictly for educational and research purposes**.  
+While DeepGuard AI achieves high accuracy, no deepfake detection system is perfect.  
+Always verify critical content through multiple independent sources.  
+Do not use this tool as the sole basis for legal, journalistic, or security decisions.
 
 ---
 
-**Made with ❤️ for a safer digital world**
+<div align="center">
 
+**Made with 🧡 for a safer, more trustworthy digital world**
+
+*DeepGuard AI — Unmask the Deepfake. Protect the Truth.*
+
+</div>
