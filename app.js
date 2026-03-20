@@ -326,9 +326,11 @@ function removeFile() {
 }
 
 /* ==========================================================
-   ANALYZE (Demo simulation — connect to Gradio API)
+   ANALYZE (Connected to Gradio API)
    ========================================================== */
-function analyzeFile() {
+const GRADIO_URL = '/gradio';
+
+async function analyzeFile() {
   if (!window._currentFile) return;
 
   // Show scanning state
@@ -336,7 +338,6 @@ function analyzeFile() {
   document.getElementById('result-output').classList.add('hidden');
   document.getElementById('result-scanning').classList.remove('hidden');
 
-  // Animate scan steps
   const steps = ['ss1', 'ss2', 'ss3', 'ss4'];
   let stepIdx = 0;
   steps.forEach(id => document.getElementById(id).className = 'scan-step');
@@ -349,24 +350,64 @@ function analyzeFile() {
       stepIdx++;
       document.getElementById(steps[stepIdx]).classList.add('active');
     }
-  }, 700);
+  }, 1000);
 
-  // Simulate 3-second analysis
-  setTimeout(() => {
+  try {
+    const file = window._currentFile;
+    const reader = new FileReader();
+    
+    // Read file as base64 to send to Gradio
+    const base64Promise = new Promise((resolve) => {
+      reader.onload = () => resolve(reader.result);
+      reader.readAsDataURL(file);
+    });
+    
+    const base64Data = await base64Promise;
+
+    // Call Gradio API 
+    // Index 0: Image, 1: Video, 2: Audio
+    let endpointIdx = 0;
+    if (currentTab === 'video') endpointIdx = 1;
+    if (currentTab === 'audio') endpointIdx = 2;
+
+    const response = await fetch(`${GRADIO_URL}/api/predict`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        data: [base64Data],
+        fn_index: endpointIdx
+      })
+    });
+
+    if (!response.ok) throw new Error("Backend connection failed. Is app.py running?");
+    
+    const json = await response.json();
+    const resultText = json.data[0];
+
     clearInterval(stepTimer);
     steps.forEach(id => document.getElementById(id).classList.add('done'));
-    showDemoResult();
-  }, 3200);
+    
+    // Process results
+    processBackendResult(resultText);
+    
+  } catch (error) {
+    clearInterval(stepTimer);
+    console.error("API Error:", error);
+    alert("Connection Error: " + error.message);
+    resetDetector();
+  }
 }
 
-function showDemoResult() {
+function processBackendResult(text) {
   document.getElementById('result-scanning').classList.add('hidden');
   document.getElementById('result-output').classList.remove('hidden');
 
-  // Random demo result (in real app, this comes from Gradio API)
-  const isReal = Math.random() > 0.4;
-  const confidence = (Math.random() * 20 + 78).toFixed(1);
-  const fakeConf = (100 - parseFloat(confidence)).toFixed(1);
+  // Parse result from pipeline.py (e.g., "The image is REAL. \n Deepfakes Confidence: 2.5%")
+  const isReal = text.toUpperCase().includes('REAL');
+  const confidenceMatch = text.match(/(\d+\.?\d*)%/);
+  const confidenceStr = confidenceMatch ? confidenceMatch[1] : '0';
+  const confidence = parseFloat(confidenceStr);
+  const fakeConf = (100 - confidence).toFixed(1);
 
   const verdictLabel = document.getElementById('verdict-label');
   const verdictIcon = document.getElementById('verdict-icon');
@@ -381,37 +422,36 @@ function showDemoResult() {
     verdictLabel.textContent = 'REAL';
     verdictLabel.className = 'verdict-label real-verdict';
     verdictIcon.textContent = '✅';
-    verdictConf.textContent = `${confidence}% Confidence – Likely Authentic`;
+    verdictConf.textContent = `${(100-confidence).toFixed(1)}% Deepfake Confidence – Likely Authentic`;
     document.getElementById('result-verdict').style.borderColor = 'rgba(255,100,0,0.3)';
   } else {
     verdictLabel.textContent = 'FAKE';
     verdictLabel.className = 'verdict-label fake-verdict';
     verdictIcon.textContent = '🚫';
-    verdictConf.textContent = `${fakeConf}% Deepfake Confidence – Manipulation Detected`;
+    verdictConf.textContent = `${confidence}% Deepfake Confidence – Manipulation Detected`;
     document.getElementById('result-verdict').style.borderColor = 'rgba(255,50,50,0.35)';
   }
 
   // Animate bars
   setTimeout(() => {
     if (isReal) {
-      realFill.style.width = confidence + '%';
-      fakeFill.style.width = fakeConf + '%';
-      realPct.textContent = confidence + '%';
-      fakePct.textContent = fakeConf + '%';
-    } else {
-      realFill.style.width = fakeConf + '%';
+      realFill.style.width = (100 - confidence) + '%';
       fakeFill.style.width = confidence + '%';
-      realPct.textContent = fakeConf + '%';
+      realPct.textContent = (100-confidence).toFixed(1) + '%';
+      fakePct.textContent = confidence + '%';
+    } else {
+      realFill.style.width = (100 - confidence) + '%';
+      fakeFill.style.width = confidence + '%';
+      realPct.textContent = (100-confidence).toFixed(1) + '%';
       fakePct.textContent = confidence + '%';
     }
   }, 100);
 
   const file = window._currentFile;
   raw.textContent =
-    `File: ${file.name}\nType: ${file.type}\nSize: ${(file.size / 1024).toFixed(1)} KB\n` +
-    `Model: EfficientNet-B0\nFrames analyzed: ${currentTab === 'video' ? 5 : 1}\n` +
-    `Result: The ${currentTab} is ${isReal ? 'REAL' : 'FAKE'}.\n` +
-    `Deepfakes Confidence: ${fakeConf}%`;
+    `File: ${file.name}\nType: ${file.type}\nStatus: ANALYSIS COMPLETE\n` +
+    `Backend Response: ${text.replace('\n', ' ')}\n` +
+    `Deepfakes Confidence: ${isReal ? confidence + '%' : confidence + '%'}`;
 }
 
 function resetDetector() {
