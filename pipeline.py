@@ -111,13 +111,15 @@ class DetectionPipeline:
             print('Input modality is image.')
             #Perform inference for image modality.
             print('Reading image')
-            # print(f"Image path is: {filename}")
-            image = cv2.cvtColor(filename, cv2.COLOR_BGR2RGB)
+            if isinstance(filename, str):
+                image = cv2.imread(filename)
+                if image is None:
+                    raise ValueError(f"Could not read image file: {filename}")
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            else:
+                image = filename
+                
             image = cv2.resize(image, (224, 224))
-
-            # if not face.any():
-            #     print("No faces found...")
-
             return image
         
         elif self.input_modality == 'audio':
@@ -204,7 +206,15 @@ audio_label_map = {
 
 def deepfakes_audio_predict(input_audio):
     #Perform inference on audio.
-    x, sr = input_audio
+    if isinstance(input_audio, str):
+        x, sr = librosa.load(input_audio, sr=16000)
+    else:
+        sr, x = input_audio
+        if x.ndim > 1:
+            x = x.mean(axis=1) # mix to mono if stereo
+        if x.dtype != np.float32:
+            x = x.astype(np.float32) / np.max(np.abs(x))
+            
     x_pt = torch.Tensor(x)
     x_pt = torch.unsqueeze(x_pt, dim = 0)
 

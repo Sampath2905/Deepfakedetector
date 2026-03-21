@@ -4,6 +4,10 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 import os
+import base64
+import tempfile
+from pydantic import BaseModel
+
 
 # Custom CSS for larger interface
 custom_css = """
@@ -14,7 +18,7 @@ custom_css = """
 # Define Gradio Interfaces (Same as before)
 image_interface = gr.Interface(
     fn=pipeline.deepfakes_image_predict,
-    inputs=gr.Image(label="Upload Image", height=500),
+    inputs=gr.Image(label="Upload Image", height=500, type="filepath"),
     outputs=gr.Textbox(label="Detection Result", lines=8, scale=2),
     title="Image Deepfake Detection"
 )
@@ -26,7 +30,7 @@ video_interface = gr.Interface(
 )
 audio_interface = gr.Interface(
     fn=pipeline.deepfakes_audio_predict,
-    inputs=gr.Audio(label="Upload Audio"),
+    inputs=gr.Audio(label="Upload Audio", type="filepath"),
     outputs=gr.Textbox(label="Detection Result", lines=4),
     title="Audio Deepfake Detection"
 )
@@ -41,7 +45,40 @@ with gr.Blocks(css=custom_css) as gradio_app:
 # FastAPI Integration
 app = FastAPI()
 
+class DetectRequest(BaseModel):
+    data: list[str]
+    fn_index: int
+
+@app.post("/custom_api/predict")
+async def custom_predict(req: DetectRequest):
+    b64 = req.data[0]
+    # Remove data URI header if present
+    header, encoded = b64.split(",", 1) if "," in b64 else ("", b64)
+    data = base64.b64decode(encoded)
+    
+    suffix = ".mp4" if req.fn_index == 1 else (".wav" if req.fn_index == 2 else ".jpg")
+    
+    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as temp:
+        temp.write(data)
+        temp_path = temp.name
+        
+    try:
+        if req.fn_index == 0:
+            result = pipeline.deepfakes_image_predict(temp_path)
+        elif req.fn_index == 1:
+            result = pipeline.deepfakes_video_predict(temp_path)
+        else:
+            result = pipeline.deepfakes_audio_predict(temp_path)
+            
+        return {"data": [result]}
+    except Exception as e:
+        return {"data": [f"Error: {str(e)}"]}
+    finally:
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+
 # 1. Mount specific static asset folders (Images, Videos, Audios)
+
 for folder in ["images", "videos", "audios"]:
     if os.path.exists(folder):
         app.mount(f"/{folder}", StaticFiles(directory=folder), name=folder)
