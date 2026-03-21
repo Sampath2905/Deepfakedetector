@@ -370,16 +370,13 @@ async function analyzeFile() {
     if (currentTab === 'video') endpointIdx = 1;
     if (currentTab === 'audio') endpointIdx = 2;
 
-    const response = await fetch(`${GRADIO_URL}/api/predict`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        data: [base64Data],
-        fn_index: endpointIdx
-      })
-    });
+    const payload = JSON.stringify({ data: [base64Data], fn_index: endpointIdx });
+    const headers = { "Content-Type": "application/json" };
 
-    if (!response.ok) throw new Error("Backend connection failed. Is app.py running?");
+    // Use our ultra-stable custom API route in FastAPI
+    let response = await fetch(`/custom_api/predict`, { method: "POST", headers, body: payload });
+
+    if (!response.ok) throw new Error(`Backend failed with status ${response.status}. Is app.py running?`);
     
     const json = await response.json();
     const resultText = json.data[0];
